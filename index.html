@@ -10,10 +10,10 @@
                 $board = generateBoard();
                 $('body').append($board);
                 showPieces();
-                $('.piece').live('click', function() {
+                $('.piece').live('click touchstart', function() {
 		    $(this).showValidMoves();
                 })
-		$('.valid').live('click', function() {
+		$('.valid').live('click touchstart', function() {
 		    console.log('moving...');
 		    $('.active').moveTo($(this));
 		});
@@ -187,6 +187,9 @@
             }
         </script>
         <style type="text/css">
+	    body {
+		width: 320px;
+	    }
             div {
                 margin: 0;
                 border: 0;
@@ -194,7 +197,7 @@
             }
             .board {
                 position: absolute;
-                bottom: 0px;
+                top: 0px;
                 left: 50%;
                 margin-left: -160px;
                 width: 320px;
