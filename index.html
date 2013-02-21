@@ -14,7 +14,6 @@
 		    $(this).showValidMoves();
                 })
 		$('.valid').live('click touchstart', function() {
-		    console.log('moving...');
 		    $('.active').moveTo($(this));
 		});
             });
@@ -119,7 +118,7 @@
 		}
 		$('.valid').removeClass('valid');
 		for(var i = 0; i < moves.length; i++) {
-		    console.log($('.'+moves[i]).addClass('valid'));
+		    $('.'+moves[i]).addClass('valid');
 		}
 		if(moves.length > 0) {
 		    $('.active').removeClass('active');    
@@ -136,39 +135,47 @@
 		    // Todo: allow captures
 		    return false;
 		}
-		console.log($piece, $square);
 		$square.append($piece);
+		$('.valid').removeClass('valid');
+		$('.active').removeClass('active');    
 	    }
 	    function validPawnMoves(x, y, color) {
 	        // Returns the valid moves for a pawn of a specific color at a
 		// specific x, y location.
 		var moves = [];
 		if(color == 'white') {
-		    if(y == 6 && spaceIsEmpty(x,y-1) && spaceIsEmpty(x,y-2)) {
+		    if(y == 6 && !occupant(x,y-1) && !occupant(x,y-2)) {
 			// The pawn has not yet moved and there is nothing in
 			// the space in front of it or the space after that
 			moves.push(toLoc({x: x, y: y-2}));
 		    }
-		    if(spaceIsEmpty(x, y-1)) {
+		    if(!occupant(x, y-1)) {
 			moves.push(toLoc({x: x, y: y-1}));
 		    }
-		    if(!spaceIsEmpty(x-1, y-1)) {
-			// ToDo: diagonal captures
+		    if(occupant(x-1, y-1)) {
+			if(occupant(x-1, y-1).hasClass('black')) {
+			    moves.push(toLoc({x: x-1, y: y-1}));
+			}
+		    }
+		    if(occupant(x+1, y-1)) {
+			if(occupant(x+1, y-1).hasClass('black')) {
+			    moves.push(toLoc({x: x+1, y: y-1}));
+			}
 		    }
 		}
 		else {
-		    if(y == 1 && spaceIsEmpty(x,y+1) && spaceIsEmpty(x,y+2)) {
+		    if(y == 1 && !occupant(x,y+1) && !occupant(x,y+2)) {
 			// The pawn has not yet moved and there is nothing in
 			// the space in front of it or the space after that
 			moves.push(toLoc({x: x, y: y+2}));
 		    }
-		    if(spaceIsEmpty(x, y+1)) {
+		    if(!occupant(x, y+1)) {
 			moves.push(toLoc({x: x, y: y+1}));
 		    }
 		}
 		return moves;
 	    }
-	    function spaceIsEmpty(x, y) {
+	    function occupant(x, y) {
 		// Says whether or not this space is empty. Can take x, y 
 		// coordinates or location strings.
 		if(!x && x !== 0) return false;
@@ -176,9 +183,9 @@
 		    // A location string was passed in.
 		    var loc = x;
 		}
-		else loc = toLoc({x: x, y: y});
-		$square = $('.'+loc);
-		if($square.children().length == 0) return true;
+		else var loc = toLoc({x: x, y: y});
+		var $square = $('.'+loc);
+		if($square.children().length == 0) return false;
 		else return $square.children().eq(0);
 	    }
             function kingIsInCheck(color) {
@@ -186,59 +193,7 @@
                 return false;
             }
         </script>
-        <style type="text/css">
-	    body {
-		width: 320px;
-	    }
-            div {
-                margin: 0;
-                border: 0;
-                padding: 0;
-            }
-            .board {
-                position: absolute;
-                top: 0px;
-                left: 50%;
-                margin-left: -160px;
-                width: 320px;
-                height: 320px;
-            }
-            .row {
-                width: 320px;
-                height: 40px;
-            }
-            .square {
-                width: 38px;
-                height: 38px;
-		border: 1px solid #e7e7e7;
-                display: inline-block;
-                position: relative;
-            }
-	    .square.valid {
-		border: 1px solid #777777;
-	    }
-	    .active {
-		font-weight: bold;
-	    }
-            .piece {
-                position: absolute;
-                font-size: 38px;
-                height: 38px;
-                width: 38px;
-            }
-            .row:nth-child(2n) .square:nth-child(2n) {
-                background: #eee;
-            }
-            .row:nth-child(2n+1) .square:nth-child(2n) {
-                background: #ddd;
-            }
-            .row:nth-child(2n+1) .square:nth-child(2n+1) {
-                background: #eee;
-            }
-            .row:nth-child(2n) .square:nth-child(2n+1) {
-                background: #ddd;
-            }
-        </style>
+        <link type="text/css" rel="stylesheet" href="/chess/chess.css" />
     </head>
     <body>
     </body>
