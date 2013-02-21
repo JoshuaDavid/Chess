@@ -1,0 +1,55 @@
+body {
+    width: 320px;
+}
+div {
+    margin: 0;
+    border: 0;
+    padding: 0;
+}
+.board {
+    position: absolute;
+    top: 0px;
+    left: 50%;
+    margin-left: -160px;
+    width: 320px;
+    height: 320px;
+}
+.row {
+    width: 320px;
+    height: 40px;
+}
+.square {
+    width: 38px;
+    height: 38px;
+    border: 1px solid #e7e7e7;
+    display: inline-block;
+    position: relative;
+}
+.square.valid {
+    border: 1px solid #777777;
+}
+.active {
+    font-weight: bold;
+}
+.piece {
+    position: absolute;
+    font-size: 38px;
+    height: 38px;
+    width: 38px;
+}
+.row:nth-child(2n) .square:nth-child(2n) {
+    background: #eee;
+    border: 1px solid #eee;
+}
+.row:nth-child(2n+1) .square:nth-child(2n) {
+    background: #ddd;
+    border: 1px solid #ddd;
+}
+.row:nth-child(2n+1) .square:nth-child(2n+1) {
+    background: #eee;
+    border: 1px solid #eee;
+}
+.row:nth-child(2n) .square:nth-child(2n+1) {
+    background: #ddd;
+    border: 1px solid #ddd;
+}
