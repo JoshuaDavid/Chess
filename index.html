@@ -1,0 +1,157 @@
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Chess</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                // Variables beginning with $ are DOM elements.
+                // All other variables are not.
+                $board = generateBoard();
+                $('body').append($board);
+                showPieces();
+                $('piece
+            });
+            pieces = [
+                {'location': 'a1', 'type': 'R', 'color': 'black', 'symbol': '&#9820'},
+                {'location': 'b1', 'type': 'N', 'color': 'black', 'symbol': '&#9822'},
+                {'location': 'c1', 'type': 'B', 'color': 'black', 'symbol': '&#9821'},
+                {'location': 'd1', 'type': 'Q', 'color': 'black', 'symbol': '&#9819'},
+                {'location': 'e1', 'type': 'K', 'color': 'black', 'symbol': '&#9818'},
+                {'location': 'f1', 'type': 'B', 'color': 'black', 'symbol': '&#9821'},
+                {'location': 'g1', 'type': 'N', 'color': 'black', 'symbol': '&#9822'},
+                {'location': 'h1', 'type': 'R', 'color': 'black', 'symbol': '&#9820'},
+                {'location': 'a2', 'type': 'P', 'color': 'black', 'symbol': '&#9823'},
+                {'location': 'b2', 'type': 'P', 'color': 'black', 'symbol': '&#9823'},
+                {'location': 'c2', 'type': 'P', 'color': 'black', 'symbol': '&#9823'},
+                {'location': 'd2', 'type': 'P', 'color': 'black', 'symbol': '&#9823'},
+                {'location': 'e2', 'type': 'P', 'color': 'black', 'symbol': '&#9823'},
+                {'location': 'f2', 'type': 'P', 'color': 'black', 'symbol': '&#9823'},
+                {'location': 'g2', 'type': 'P', 'color': 'black', 'symbol': '&#9823'},
+                {'location': 'h2', 'type': 'P', 'color': 'black', 'symbol': '&#9823'},
+                {'location': 'a7', 'type': 'P', 'color': 'white', 'symbol': '&#9817'},
+                {'location': 'b7', 'type': 'P', 'color': 'white', 'symbol': '&#9817'},
+                {'location': 'c7', 'type': 'P', 'color': 'white', 'symbol': '&#9817'},
+                {'location': 'd7', 'type': 'P', 'color': 'white', 'symbol': '&#9817'},
+                {'location': 'e7', 'type': 'P', 'color': 'white', 'symbol': '&#9817'},
+                {'location': 'f7', 'type': 'P', 'color': 'white', 'symbol': '&#9817'},
+                {'location': 'g7', 'type': 'P', 'color': 'white', 'symbol': '&#9817'},
+                {'location': 'h7', 'type': 'P', 'color': 'white', 'symbol': '&#9817'},
+                {'location': 'a8', 'type': 'R', 'color': 'white', 'symbol': '&#9814'},
+                {'location': 'b8', 'type': 'N', 'color': 'white', 'symbol': '&#9816'},
+                {'location': 'c8', 'type': 'B', 'color': 'white', 'symbol': '&#9815'},
+                {'location': 'd8', 'type': 'Q', 'color': 'white', 'symbol': '&#9813'},
+                {'location': 'e8', 'type': 'K', 'color': 'white', 'symbol': '&#9812'},
+                {'location': 'f8', 'type': 'B', 'color': 'white', 'symbol': '&#9815'},
+                {'location': 'g8', 'type': 'N', 'color': 'white', 'symbol': '&#9816'},
+                {'location': 'h8', 'type': 'R', 'color': 'white', 'symbol': '&#9814'},
+            ];
+            for(var i = 0; i < pieces.length; i++) {
+                if(pieces[i]['type'] == 'P') {
+                    pieces[i]['canJump'] = true;
+                }
+            }
+
+            function generateBoard() {
+                // Generates the html of the board itself
+                var squares = [
+                    ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'],
+                    ['a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2'],
+                    ['a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3'],
+                    ['a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4'],
+                    ['a5', 'b5', 'c5', 'd5', 'e5', 'f5', 'g5', 'h5'],
+                    ['a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6'],
+                    ['a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7'],
+                    ['a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8']
+                ];
+                var $board = $('<div class="board"/>');
+                for(var y = 0; y < squares.length; y++) {
+                    var row = squares[y];
+                    var $row = $('<div class="row"/>');
+                    for(var x = 0; x < row.length; x++) {
+                        var square = row[x];
+                        var $square = $('<div class="square '+square+'"/>');
+                        $.data($square, {x: x, y:y});
+                        $row.append($square);
+                    }
+                    $board.append($row);
+                }
+                return $board;
+            }
+            function showPieces() {
+                $('.piece').remove();
+                for(var i = 0; i < pieces.length; i++) {
+                    $piece = $('<div class="piece">');
+                    $piece.addClass(pieces[i]['color']);
+                    $piece.addClass(pieces[i]['type']);
+                    $piece.html(pieces[i]['symbol']);
+                    $('.' + pieces[i]['location']).append($piece);
+                }
+            }
+            function toXY(loc) {
+                cols = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5 , 'g': 6, 'h': 7};
+                x = cols[loc[0]];
+                y = parseInt(loc[1]) - 1;
+                return {x: x, y: y};
+            }
+            function showValidMoves(piece) {
+                moves = [];
+                console.log(toXY(piece['location']));
+                if(piece['type'] == 'P') {
+                    if(piece['color'] == 'white') {
+                    }
+                }
+                return moves;
+            }
+            function kingIsInCheck(color) {
+                // Todo: implement this.
+                return false;
+            }
+        </script>
+        <style type="text/css">
+            div {
+                margin: 0;
+                border: 0;
+                padding: 0;
+            }
+            .board {
+                position: absolute;
+                bottom: 0px;
+                left: 50%;
+                margin-left: -160px;
+                width: 320px;
+                height: 320px;
+            }
+            .row {
+                width: 320px;
+                height: 40px;
+            }
+            .square {
+                width: 40px;
+                height: 40px;
+                display: inline-block;
+                position: relative;
+            }
+            .piece {
+                position: absolute;
+                font-size: 40px;
+                height: 40px;
+                width: 40px;
+            }
+            .row:nth-child(2n) .square:nth-child(2n) {
+                background: #eee;
+            }
+            .row:nth-child(2n+1) .square:nth-child(2n) {
+                background: #ddd;
+            }
+            .row:nth-child(2n+1) .square:nth-child(2n+1) {
+                background: #eee;
+            }
+            .row:nth-child(2n) .square:nth-child(2n+1) {
+                background: #ddd;
+            }
+        </style>
+    </head>
+    <body>
+    </body>
+</html>
