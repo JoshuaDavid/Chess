@@ -10,13 +10,16 @@
                 $board = generateBoard();
                 $('body').append($board);
                 showPieces();
-                $('.piece').click(function() {
-                    console.log($(this).attr('x'));
-                    console.log($(this).attr('y'));
+                $('.piece').live('click', function() {
+		    $(this).showValidMoves();
                 })
+		$('.valid').live('click', function() {
+		    console.log('moving...');
+		    $('.active').moveTo($(this));
+		});
             });
-            pieces = [
-                {'location': 'a1', 'type': 'R', 'color': 'black', 'symbol': '&#9820'},<!--{-->
+            pieces = [/*{*/
+                {'location': 'a1', 'type': 'R', 'color': 'black', 'symbol': '&#9820'},
                 {'location': 'b1', 'type': 'N', 'color': 'black', 'symbol': '&#9822'},
                 {'location': 'c1', 'type': 'B', 'color': 'black', 'symbol': '&#9821'},
                 {'location': 'd1', 'type': 'Q', 'color': 'black', 'symbol': '&#9819'},
@@ -48,16 +51,15 @@
                 {'location': 'f8', 'type': 'B', 'color': 'white', 'symbol': '&#9815'},
                 {'location': 'g8', 'type': 'N', 'color': 'white', 'symbol': '&#9816'},
                 {'location': 'h8', 'type': 'R', 'color': 'white', 'symbol': '&#9814'},
-            ];<!--}-->
+            ];/*}*/
             for(var i = 0; i < pieces.length; i++) {
                 if(pieces[i]['type'] == 'P') {
                     pieces[i]['canJump'] = true;
                 }
             }
-
             function generateBoard() {
                 // Generates the html of the board itself
-                var squares = [
+                var squares = [/*{*/
                     ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'],
                     ['a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2'],
                     ['a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3'],
@@ -66,7 +68,7 @@
                     ['a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6'],
                     ['a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7'],
                     ['a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8']
-                ];
+                /*}*/];
                 var $board = $('<div class="board"/>');
                 for(var y = 0; y < squares.length; y++) {
                     var row = squares[y];
@@ -87,28 +89,98 @@
                     $piece.addClass(pieces[i]['color']);
                     $piece.addClass(pieces[i]['type']);
                     $piece.html(pieces[i]['symbol']);
-                    var xy = toXY(pieces[i]['location']);
-                    console.log(xy);
-                    $piece.attr('x', xy.x);
-                    $piece.attr('y', xy.y);
                     $('.' + pieces[i]['location']).append($piece);
                 }
             }
             function toXY(loc) {
-                cols = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5 , 'g': 6, 'h': 7};
-                x = cols[loc[0]];
-                y = parseInt(loc[1]) - 1;
+                var cols = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5 , 'g': 6, 'h': 7};
+                var x = cols[loc[0]];
+                var y = parseInt(loc[1]) - 1;
                 return {x: x, y: y};
             }
-            function showValidMoves(piece) {
-                moves = [];
-                console.log(toXY(piece['location']));
-                if(piece['type'] == 'P') {
-                    if(piece['color'] == 'white') {
-                    }
-                }
+	    function toLoc(xy) {
+		// Takes an xy coordinate and converts it into a string location
+		var loc = '';
+                var cols = { 0:'a',  1:'b',  2:'c',  3:'d',  4:'e',  5 :'f',  6:'g',  7:'h'};
+		loc += cols[xy.x];
+		loc += (xy.y + 1);
+		return loc;
+			
+	    }
+            $.fn.showValidMoves = function() {
+                var moves = [];
+		var $piece = $(this);
+		var $square = $piece.parent();
+		var color = $piece.hasClass('white') ? 'white' : 'black';
+		var loc = $square.attr('class').split(' ')[1];
+		var xy = toXY(loc);
+		if($piece.hasClass('P')) {
+		    moves = validPawnMoves(xy.x, xy.y, color);
+		}
+		$('.valid').removeClass('valid');
+		for(var i = 0; i < moves.length; i++) {
+		    console.log($('.'+moves[i]).addClass('valid'));
+		}
+		if(moves.length > 0) {
+		    $('.active').removeClass('active');    
+		    $piece.addClass('active');
+		}
                 return moves;
             }
+	    $.fn.moveTo = function($square) {
+		var $piece = $(this);
+		if($square.hasClass('piece')) {
+		    // We are trying to take another piece. Make sure that we
+		    // actually are allowed to do that, then do it.
+
+		    // Todo: allow captures
+		    return false;
+		}
+		console.log($piece, $square);
+		$square.append($piece);
+	    }
+	    function validPawnMoves(x, y, color) {
+	        // Returns the valid moves for a pawn of a specific color at a
+		// specific x, y location.
+		var moves = [];
+		if(color == 'white') {
+		    if(y == 6 && spaceIsEmpty(x,y-1) && spaceIsEmpty(x,y-2)) {
+			// The pawn has not yet moved and there is nothing in
+			// the space in front of it or the space after that
+			moves.push(toLoc({x: x, y: y-2}));
+		    }
+		    if(spaceIsEmpty(x, y-1)) {
+			moves.push(toLoc({x: x, y: y-1}));
+		    }
+		    if(!spaceIsEmpty(x-1, y-1)) {
+			// ToDo: diagonal captures
+		    }
+		}
+		else {
+		    if(y == 1 && spaceIsEmpty(x,y+1) && spaceIsEmpty(x,y+2)) {
+			// The pawn has not yet moved and there is nothing in
+			// the space in front of it or the space after that
+			moves.push(toLoc({x: x, y: y+2}));
+		    }
+		    if(spaceIsEmpty(x, y+1)) {
+			moves.push(toLoc({x: x, y: y+1}));
+		    }
+		}
+		return moves;
+	    }
+	    function spaceIsEmpty(x, y) {
+		// Says whether or not this space is empty. Can take x, y 
+		// coordinates or location strings.
+		if(!x && x !== 0) return false;
+		if(!y && x.match(/^[a-h][1-8]$/g)) {
+		    // A location string was passed in.
+		    var loc = x;
+		}
+		else loc = toLoc({x: x, y: y});
+		$square = $('.'+loc);
+		if($square.children().length == 0) return true;
+		else return $square.children().eq(0);
+	    }
             function kingIsInCheck(color) {
                 // Todo: implement this.
                 return false;
@@ -133,16 +205,23 @@
                 height: 40px;
             }
             .square {
-                width: 40px;
-                height: 40px;
+                width: 38px;
+                height: 38px;
+		border: 1px solid #e7e7e7;
                 display: inline-block;
                 position: relative;
             }
+	    .square.valid {
+		border: 1px solid #777777;
+	    }
+	    .active {
+		font-weight: bold;
+	    }
             .piece {
                 position: absolute;
-                font-size: 40px;
-                height: 40px;
-                width: 40px;
+                font-size: 38px;
+                height: 38px;
+                width: 38px;
             }
             .row:nth-child(2n) .square:nth-child(2n) {
                 background: #eee;
