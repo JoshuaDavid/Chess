@@ -10,10 +10,13 @@
                 $board = generateBoard();
                 $('body').append($board);
                 showPieces();
-                $('piece
+                $('.piece').click(function() {
+                    console.log($(this).attr('x'));
+                    console.log($(this).attr('y'));
+                })
             });
             pieces = [
-                {'location': 'a1', 'type': 'R', 'color': 'black', 'symbol': '&#9820'},
+                {'location': 'a1', 'type': 'R', 'color': 'black', 'symbol': '&#9820'},<!--{-->
                 {'location': 'b1', 'type': 'N', 'color': 'black', 'symbol': '&#9822'},
                 {'location': 'c1', 'type': 'B', 'color': 'black', 'symbol': '&#9821'},
                 {'location': 'd1', 'type': 'Q', 'color': 'black', 'symbol': '&#9819'},
@@ -45,7 +48,7 @@
                 {'location': 'f8', 'type': 'B', 'color': 'white', 'symbol': '&#9815'},
                 {'location': 'g8', 'type': 'N', 'color': 'white', 'symbol': '&#9816'},
                 {'location': 'h8', 'type': 'R', 'color': 'white', 'symbol': '&#9814'},
-            ];
+            ];<!--}-->
             for(var i = 0; i < pieces.length; i++) {
                 if(pieces[i]['type'] == 'P') {
                     pieces[i]['canJump'] = true;
@@ -71,7 +74,6 @@
                     for(var x = 0; x < row.length; x++) {
                         var square = row[x];
                         var $square = $('<div class="square '+square+'"/>');
-                        $.data($square, {x: x, y:y});
                         $row.append($square);
                     }
                     $board.append($row);
@@ -85,6 +87,10 @@
                     $piece.addClass(pieces[i]['color']);
                     $piece.addClass(pieces[i]['type']);
                     $piece.html(pieces[i]['symbol']);
+                    var xy = toXY(pieces[i]['location']);
+                    console.log(xy);
+                    $piece.attr('x', xy.x);
+                    $piece.attr('y', xy.y);
                     $('.' + pieces[i]['location']).append($piece);
                 }
             }
