@@ -100,7 +100,15 @@ function toLoc(xy) {
     return loc;
 	    
 }
+$.fn.validMoves = function($piece) {
+    // Return a selector with the valid moves for that piece.
+    var $moves = $();
+    
+}
 $.fn.showValidMoves = function() {
+    if($('.active').length > 0) {
+	$('.active').capture($(this));	
+    }
     var moves = [];
     var $piece = $(this);
     var $square = $piece.parent();
@@ -132,6 +140,11 @@ $.fn.moveTo = function($square) {
     $square.append($piece);
     $('.valid').removeClass('valid');
     $('.active').removeClass('active');    
+}
+$.fn.capture = function($victim) {
+    var $attacker = $(this);
+    console.log($attacker, 'is attempting to take', $victim);
+    return false;
 }
 function validPawnMoves(x, y, color) {
     // Returns the valid moves for a pawn of a specific color at a

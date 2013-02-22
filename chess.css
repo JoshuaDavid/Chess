@@ -26,7 +26,7 @@ div {
     position: relative;
 }
 .square.valid {
-    border: 1px solid #777777;
+    border: 1px solid #777777 !important;
 }
 .active {
     font-weight: bold;
