@@ -7,11 +7,12 @@
             var defaults = {
                 showHeader: true,
                 showFooter: true,
-                squareSize: '40px',
+                squareSize: '10px',
                 showCaptured: true,
                 clearInside: true,
 		blackSquareColor: '#ddd',
 		whiteSquareColor: '#eee',
+                whoseTurn: 'white',
                 onPieceSelect: function() {},
                 onPieceMoveStart: function() {},
                 onPieceMoveEnd: function () {}
@@ -67,18 +68,20 @@
 		    }
 		    $board.append($row);
 		}
-		$board.find('div:even div:even').css({
+		$board.children('div:even').children('div:even').css({
 		    'background': options.whiteSquareColor
-		});
-		$board.find('div:odd div:even').css({
+		}).end().end()
+		.children('div:odd').children('div:even').css({
 		    'background': options.blackSquareColor
-		});
-		$board.find('div:even div:odd').css({
+		}).end().end()
+		.children('div:even').children('div:odd').css({
 		    'background': options.blackSquareColor
-		});
-		$board.find('div:odd div:odd').css({
+		}).end().end()
+		.children('div:odd').children('div:odd').css({
 		    'background': options.whiteSquareColor
-		});
+		}).end().end()
+                .children().children()
+                .on('click.chessboard', handleSquareClick);
 		return $board;
 	    }
 
@@ -106,15 +109,64 @@
 			'height': '100%',
 			'text-align': 'center',
 			'position': 'absolute'
-		    });
-		    $piece.on("click.chessboard", function() {
-			validMoves($(this));
-			validCaptures($(this));
-		    });
+		    })
+		    .on("click.chessboard", handlePieceClick);
 		    $board.find('.' + i).append($piece);
 		}
 		return $board;
 	    }
+
+            var handlePieceClick = function() {
+                if($(this).hasClass(options.whoseTurn)) {
+                    $('.chessboard-active-piece')
+                    .removeClass('chessboard-active-piece');
+                    $(this).addClass('chessboard-active-piece');
+                    removeHighlighting();
+                    validMoves($(this))
+                    .addClass('chessboard-valid-move');
+                    validCaptures($(this))
+                    .addClass('chessboard-valid-capture');
+                }
+                else if($(this).parent().hasClass('chessboard-valid-capture')) {
+                    var $active = $('.chessboard-active-piece');
+                    $('.chessboard-footer').html($(this).clone());
+                    $(this).parent().html($active);
+                    nextTurn();
+                }
+                return false;
+            }
+
+            var handleSquareClick = function() {
+                var $active = $('.chessboard-active-piece');
+                if($(this).hasClass('chessboard-valid-move')) {
+                    if($(this).children().length == 0) {
+                        $(this).html($active);
+                        nextTurn();
+                    }
+                }
+                return false;
+            }
+
+            var nextTurn = function() {
+                removeHighlighting();
+                $('chessboard-active-piece')
+                .removeClass('chessboard-active-piece');
+                if(options.whoseTurn == 'white') {
+                    options.whoseTurn = 'black';
+                }
+                else {
+                    options.whoseTurn = 'white';
+                }
+                return;
+            }
+
+            var removeHighlighting = function() {
+                $('.chessboard-valid-move')
+                .removeClass('chessboard-valid-move');
+                $('.chessboard-valid-capture')
+                .removeClass('chessboard-valid-capture');
+                return;
+            }
 
 	    var relativeSquare = function($piece, yOffset, xOffset) {
 		/**
@@ -123,7 +175,7 @@
 		 */
 		if(!xOffset) var xOffset = 0;
 		if(!yOffset) var yOffset = 0;
-		if(!$piece) return $();
+		if(!$piece) return $([]);
 		var $square = $piece.parent();
 		var $row = $square.parent();
 		var $board = $row.parent();
@@ -132,10 +184,11 @@
 		if($piece.hasClass('white')) {
 		    var newY = oldY - yOffset;
 		}
-		else {
+                else {
 		    var newY = oldY + yOffset;
 		}
 		var newX = oldX + xOffset;
+                if(newX < 0 || newY < 0) return $([]);
 		$target = $board
 		    .children().eq(newY)
 		    .children().eq(newX);
@@ -143,11 +196,39 @@
 	    }
 
 	    var validMoves = function($piece) {
-		console.log($piece);
-		console.log(relativeSquare($piece, 1, 0));
+                var $moves = $([]);
+                if($piece.hasClass(options.whoseTurn)) {
+                    if($piece.hasClass('pawn')) {
+                        $moves = $moves.add(relativeSquare($piece, 1, 0));
+                        if(!relativeSquare($piece, -2, 0).length) {
+                            $moves = $moves.add(relativeSquare($piece, 2, 0));
+                        }
+                    }
+                }
+                return $moves;
 	    }
 
-	    var validCaptures = function($piece) {}
+	    var validCaptures = function($piece) {
+                var $moves = $([]);
+                if($piece.hasClass(options.whoseTurn)) {
+                    if($piece.hasClass('pawn')) {
+                        $moves = $moves.add(relativeSquare($piece, 1, -1));
+                        $moves = $moves.add(relativeSquare($piece, 1, 1));
+                    }
+                }
+                $moves.each(function() {
+                    if($(this).children().length == 0) {
+                        // If a square is empty, you can't capture the piece
+                        // in that square.
+                        $moves = $moves.not(this);
+                    }
+                    if($(this).children().hasClass(options.whoseTurn)) {
+                        // You can't capture your own pieces.
+                        $moves = $moves.not(this);
+                    }
+                });
+                return $moves;
+            }
 
             return this.each(function() {
                 $(this).data({
@@ -161,8 +242,10 @@
 		var $board = generateBoardHTML();
 		$(this).append($board);
 		initializePieces($board);
+                $board.css({
+                });
                 if(options.showFooter) {
-                    var $footer = $('<div/>').addClass('chessBoard-header');
+                    var $footer = $('<div/>').addClass('chessBoard-footer');
                     $(this).append($footer);
                 }
             });
