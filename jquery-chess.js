@@ -197,23 +197,274 @@
 
 	    var validMoves = function($piece) {
                 var $moves = $([]);
-                if($piece.hasClass(options.whoseTurn)) {
-                    if($piece.hasClass('pawn')) {
-                        $moves = $moves.add(relativeSquare($piece, 1, 0));
-                        if(!relativeSquare($piece, -2, 0).length) {
-                            $moves = $moves.add(relativeSquare($piece, 2, 0));
+                var validKingMoves = function($piece) {
+                    var $moves = $([]);
+                    $moves = $moves.add(relativeSquare($piece, -1, -1));
+                    $moves = $moves.add(relativeSquare($piece, 0, -1));
+                    $moves = $moves.add(relativeSquare($piece, 1, -1));
+                    $moves = $moves.add(relativeSquare($piece, -1, 0));
+                    $moves = $moves.add(relativeSquare($piece, 1, 0));
+                    $moves = $moves.add(relativeSquare($piece, -1, 1));
+                    $moves = $moves.add(relativeSquare($piece, 0, 1));
+                    $moves = $moves.add(relativeSquare($piece, 1, 1));
+                    return $moves;
+                }
+                var validQueenMoves = function($piece) {
+                    var $moves = $([]);
+                    $moves = $moves.add(validRookMoves($piece))
+                        $moves = $moves.add(validBishopMoves($piece))
+                        return $moves;
+                }
+                var validRookMoves = function($piece) {
+                    var $moves = $([]);
+                    var x = 1;
+                    while(!relativeSquare($piece, 0, x).children().length) {
+                        if(!relativeSquare($piece, 0, x).length) {
+                            break;
                         }
+                        $moves = $moves.add(relativeSquare($piece, 0, x));
+                        x++;
+                    }
+                    var x = -1;
+                    while(!relativeSquare($piece, 0, x).children().length) {
+                        if(!relativeSquare($piece, 0, x).length) {
+                            break;
+                        }
+                        $moves = $moves.add(relativeSquare($piece, 0, x));
+                        x--;
+                    }
+                    var y = 1;
+                    while(!relativeSquare($piece, y, 0).children().length) {
+                        if(!relativeSquare($piece, y, 0).length) {
+                            break;
+                        }
+                        $moves = $moves.add(relativeSquare($piece, y, 0));
+                        y++;
+                    }
+                    var y = -1;
+                    while(!relativeSquare($piece, y, 0).children().length) {
+                        if(!relativeSquare($piece, y, 0).length) {
+                            break;
+                        }
+                        $moves = $moves.add(relativeSquare($piece, y, 0));
+                        y--;
+                    }
+                    return $moves;
+                }
+                var validBishopMoves = function($piece) {
+                    var $moves = $([]);
+                    var i = 1;
+                    while(!relativeSquare($piece, i, i).children().length) {
+                        if(!relativeSquare($piece, i, i).length) {
+                            break;
+                        }
+                        $moves = $moves.add(relativeSquare($piece, i, i));
+                        i++;
+                    }
+                    var i = -1;
+                    while(!relativeSquare($piece, i, i).children().length) {
+                        if(!relativeSquare($piece, i, i).length) {
+                            break;
+                        }
+                        $moves = $moves.add(relativeSquare($piece, i, i));
+                        i--;
+                    }
+                    var i = 1;
+                    while(!relativeSquare($piece, i, -i).children().length) {
+                        if(!relativeSquare($piece, i, -i).length) {
+                            break;
+                        }
+                        $moves = $moves.add(relativeSquare($piece, i, -i));
+                        i++;
+                    }
+                    var i = -1;
+                    while(!relativeSquare($piece, i, -i).children().length) {
+                        if(!relativeSquare($piece, i, -i).length) {
+                            break;
+                        }
+                        $moves = $moves.add(relativeSquare($piece, i, -i));
+                        i--;
+                    }
+                    return $moves;
+                }
+                var validKnightMoves = function($piece) {
+                    var $moves = $([]);
+                    $moves = $moves.add(relativeSquare($piece, -2, -1));
+                    $moves = $moves.add(relativeSquare($piece, -1, -2));
+                    $moves = $moves.add(relativeSquare($piece, -2, 1));
+                    $moves = $moves.add(relativeSquare($piece, -1, 2));
+                    $moves = $moves.add(relativeSquare($piece, 2, -1));
+                    $moves = $moves.add(relativeSquare($piece, 1, -2));
+                    $moves = $moves.add(relativeSquare($piece, 2, 1));
+                    $moves = $moves.add(relativeSquare($piece, 1, 2));
+                    return $moves;
+                }
+                var validPawnMoves = function($piece) {
+                    var $moves = $([]);
+                    $moves = $moves.add(relativeSquare($piece, 1, 0));
+                    if(!relativeSquare($piece, -2, 0).length) {
+                        $moves = $moves.add(relativeSquare($piece, 2, 0));
+                    }
+                    return $moves;
+                }
+                if($piece.hasClass(options.whoseTurn)) {
+                    if($piece.hasClass('king')) {
+                        $moves = $moves.add(validKingMoves($piece));
+                    }
+                    if($piece.hasClass('queen')) {
+                        $moves = $moves.add(validQueenMoves($piece));
+                    }
+                    if($piece.hasClass('rook')) {
+                        $moves = $moves.add(validRookMoves($piece));
+                    }
+                    if($piece.hasClass('bishop')) {
+                        $moves = $moves.add(validBishopMoves($piece));
+                    }
+                    if($piece.hasClass('knight')) {
+                        $moves = $moves.add(validKnightMoves($piece));
+                    }
+                    if($piece.hasClass('pawn')) {
+                        $moves = $moves.add(validPawnMoves($piece));
                     }
                 }
+                $moves.each(function() {
+                    if($(this).children().length !== 0) {
+                        // If a square is not empty, you can't move there if
+                        // you're not capturing a piece.
+                        $moves = $moves.not(this);
+                    }
+                });
                 return $moves;
 	    }
 
 	    var validCaptures = function($piece) {
+                var validKingCaptures = function($piece) {
+                    var $moves = $([]);
+                    $moves = $moves.add(relativeSquare($piece, -1, -1));
+                    $moves = $moves.add(relativeSquare($piece, 0, -1));
+                    $moves = $moves.add(relativeSquare($piece, 1, -1));
+                    $moves = $moves.add(relativeSquare($piece, -1, 0));
+                    $moves = $moves.add(relativeSquare($piece, 1, 0));
+                    $moves = $moves.add(relativeSquare($piece, -1, 1));
+                    $moves = $moves.add(relativeSquare($piece, 0, 1));
+                    $moves = $moves.add(relativeSquare($piece, 1, 1));
+                    return $moves;
+                }
+                var validQueenCaptures = function($piece) {
+                    var $moves = $([]);
+                    $moves = $moves.add(validRookCaptures($piece))
+                        $moves = $moves.add(validBishopCaptures($piece))
+                        return $moves;
+                }
+                var validRookCaptures = function($piece) {
+                    var $moves = $([]);
+                    var x = 1;
+                    while(!relativeSquare($piece, 0, x).children().length) {
+                        if(!relativeSquare($piece, 0, x).length) {
+                            break;
+                        }
+                        x++;
+                    }
+                    $moves = $moves.add(relativeSquare($piece, 0, x));
+                    var x = -1;
+                    while(!relativeSquare($piece, 0, x).children().length) {
+                        if(!relativeSquare($piece, 0, x).length) {
+                            break;
+                        }
+                        x--;
+                    }
+                    $moves = $moves.add(relativeSquare($piece, 0, x));
+                    var y = 1;
+                    while(!relativeSquare($piece, y, 0).children().length) {
+                        if(!relativeSquare($piece, y, 0).length) {
+                            break;
+                        }
+                        y++;
+                    }
+                    $moves = $moves.add(relativeSquare($piece, y, 0));
+                    var y = -1;
+                    while(!relativeSquare($piece, y, 0).children().length) {
+                        if(!relativeSquare($piece, y, 0).length) {
+                            break;
+                        }
+                        y--;
+                    }
+                    $moves = $moves.add(relativeSquare($piece, y, 0));
+                    return $moves;
+                }
+                var validBishopCaptures = function($piece) {
+                    var $moves = $([]);
+                    var i = 1;
+                    while(!relativeSquare($piece, i, i).children().length) {
+                        if(!relativeSquare($piece, i, i).length) {
+                            break;
+                        }
+                        i++;
+                    }
+                    $moves = $moves.add(relativeSquare($piece, i, i));
+                    var i = -1;
+                    while(!relativeSquare($piece, i, i).children().length) {
+                        if(!relativeSquare($piece, i, i).length) {
+                            break;
+                        }
+                        i--;
+                    }
+                    $moves = $moves.add(relativeSquare($piece, i, i));
+                    var i = 1;
+                    while(!relativeSquare($piece, i, -i).children().length) {
+                        if(!relativeSquare($piece, i, -i).length) {
+                            break;
+                        }
+                        i++;
+                    }
+                    $moves = $moves.add(relativeSquare($piece, i, -i));
+                    var i = -1;
+                    while(!relativeSquare($piece, i, -i).children().length) {
+                        if(!relativeSquare($piece, i, -i).length) {
+                            break;
+                        }
+                        i--;
+                    }
+                    $moves = $moves.add(relativeSquare($piece, i, -i));
+                    return $moves;
+                }
+                var validKnightCaptures = function($piece) {
+                    var $moves = $([]);
+                    $moves = $moves.add(relativeSquare($piece, -2, -1));
+                    $moves = $moves.add(relativeSquare($piece, -1, -2));
+                    $moves = $moves.add(relativeSquare($piece, -2, 1));
+                    $moves = $moves.add(relativeSquare($piece, -1, 2));
+                    $moves = $moves.add(relativeSquare($piece, 2, -1));
+                    $moves = $moves.add(relativeSquare($piece, 1, -2));
+                    $moves = $moves.add(relativeSquare($piece, 2, 1));
+                    $moves = $moves.add(relativeSquare($piece, 1, 2));
+                    return $moves;
+                }
+                var validPawnCaptures = function($piece) {
+                    var $moves = $([]);
+                    $moves = $moves.add(relativeSquare($piece, 1, -1));
+                    $moves = $moves.add(relativeSquare($piece, 1, 1));
+                    return $moves;
+                }
                 var $moves = $([]);
                 if($piece.hasClass(options.whoseTurn)) {
+                    if($piece.hasClass('king')) {
+                        $moves = $moves.add(validKingCaptures($piece));
+                    }
+                    if($piece.hasClass('queen')) {
+                        $moves = $moves.add(validQueenCaptures($piece));
+                    }
+                    if($piece.hasClass('rook')) {
+                        $moves = $moves.add(validRookCaptures($piece));
+                    }
+                    if($piece.hasClass('bishop')) {
+                        $moves = $moves.add(validBishopCaptures($piece));
+                    }
+                    if($piece.hasClass('knight')) {
+                        $moves = $moves.add(validKnightCaptures($piece));
+                    }
                     if($piece.hasClass('pawn')) {
-                        $moves = $moves.add(relativeSquare($piece, 1, -1));
-                        $moves = $moves.add(relativeSquare($piece, 1, 1));
+                        $moves = $moves.add(validPawnCaptures($piece));
                     }
                 }
                 $moves.each(function() {
