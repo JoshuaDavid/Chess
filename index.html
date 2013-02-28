@@ -21,6 +21,7 @@
                         $('.chessboard').chessboard({
                             squareSize: '10px',
                             showHeader: false,
+                            //startingPosition: {'a1': 'BQ', 'g8': 'WQ'},
                             onSelect: function($piece) {
                                 return $piece.hasClass(myColor);
                             },

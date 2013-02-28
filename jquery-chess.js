@@ -27,7 +27,8 @@
                 moveHistory: [],
                 onSelect: function($piece) {},
                 onMoveStart: function($piece) {},
-                onMoveEnd: function ($piece) {}
+                onMoveEnd: function ($piece) {},
+                onGameOver: function(winner) {}
             };
             if (typeof options == 'string') {
                 var paramStr = options;
@@ -188,8 +189,6 @@
                     }
                 }
                 if($piece.length !== 1) {
-                    console.log('There must be exactly one possible piece');
-                    console.log($piece);
                     return false;
                 }
                 if(!isCapture) moveTo($piece, $target);
@@ -475,6 +474,9 @@
                         // you're not capturing a piece.
                         $moves = $moves.not(this);
                     }
+                    if(moveIsIntoCheck($piece, $piece.parent(), $(this))) {
+                        $moves = $moves.not(this);
+                    }
                 });
                 return $moves;
             }
@@ -623,6 +625,41 @@
                 return $moves;
             }
 
+            var otherColor = function(color) {
+                return color == 'white' ? 'black' : 'white';
+            }
+
+            var moveIsIntoCheck = function($piece, $start, $end) {
+                /**
+                 * Whether or not the king will be in check if $piece moves
+                 * from $start to $end.
+                 */
+                // If the move was a capture, store what's there.
+                var $endContents = $end.html();
+                var $king = $('.'+options.whoseTurn+'.king');
+                $end.html($piece);
+                var moveIsIntoCheck = false;
+                $('.' + otherColor(options.whoseTurn)).each(function() {
+                    if(validCaptures($(this)).index($king) >= 0) {
+                        moveIsIntoCheck = true;
+                    }
+                });
+                $start.html($piece);
+                $end.html($endContents);
+                return moveIsIntoCheck;
+            }
+
+            var hasValidMoves = function(player) {
+                $validMoves = $([]);
+                $('.' + player).each(function() {
+                    $validMoves = $validMoves.add(validMoves($(this)));
+                    $validMoves = $validMoves.add(validCaptures($(this)));
+                });
+                $validMoves = $validMoves.filter('.square, .black, .white');
+                if($validMoves.length > 0) return $validMoves;
+                else return false;
+            }
+            
             return this.each(function() {
                 if(func == 'init') {
                     $(this).data({
@@ -666,9 +703,14 @@
                     }
                 }
                 if(func == 'move') {
-                    console.log(paramStr);
-                    if(paramStr.length <= 7) {
-                        executeMove(paramStr);
+                    console.log("Move:"+paramStr);
+                    executeMove(paramStr);
+                    if(!hasValidMoves(options.whoseTurn)) {
+                        console.log(options.whoseTurn,'loses.')
+                        if(options.whoseTurn == 'white') {
+                            options.onGameOver('black');
+                        }
+                        else options.onGameOver('white');
                     }
                 }
             });
