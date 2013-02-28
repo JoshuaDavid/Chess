@@ -5,10 +5,45 @@
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
         <script type="text/javascript" src="./jquery-chess.js"></script>
 	<script type="text/javascript">
-	    $(document).ready(function() {
-		$('.chessboard').chessboard();
-	    });
-	</script>
+            $(document).ready(function() {
+                var connection = new WebSocket('ws://jsdavid.com:8080');
+                var myColor = false;
+                connection.onmessage = function(event) {
+                    move = event.data;
+                    if(move.match(/white/)) {
+                        myColor = 'white';
+                    }
+                    else if(move.match(/black/)) {
+                        myColor = 'black';
+                    }
+                    else if(move.match(/ready/)) {
+                        console.log("ready");
+                        $('.chessboard').chessboard({
+                            squareSize: '10px',
+                            showHeader: false,
+                            onSelect: function($piece) {
+                                return $piece.hasClass(myColor);
+                            },
+                            onMoveEnd: function($piece, move) {
+                                connection.send(move);
+                            }
+                        });   
+                    }
+                    else $('.chessboard').chessboard('move', move);
+                }
+                connection.onclose = function(event) {
+                    console.log("Connection closed.");
+                    console.log(event);
+                }
+                connection.onerror = function(event) {
+                    console.log("There was an error.");
+                    console.log(event);
+                }
+                function send(message) {
+                    connection.send(message);
+                }
+            });
+        </script>
         <link type="text/css" rel="stylesheet" href="./chess.css" />
     </head>
     <body>
