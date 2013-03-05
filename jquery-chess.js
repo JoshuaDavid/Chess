@@ -199,6 +199,7 @@
 
             var handlePieceClick = function() {
                 if($(this).hasClass(options.whoseTurn)) {
+                    console.log($(this));
                     if(options.onSelect($(this)) == false) return false;
                     $('.chessboard-active-piece')
                         .removeClass('chessboard-active-piece');
@@ -298,6 +299,7 @@
                 }
                     $('.chessboard-turn-shower')
                         .html(capFirst(options.whoseTurn)+"'s Turn");
+                console.log(kingIsInCheck(options.whoseTurn));
                 return;
             }
 
@@ -448,7 +450,7 @@
                     }
                     return $moves;
                 }
-                if($piece.hasClass(options.whoseTurn)) {
+                //if($piece.hasClass(options.whoseTurn)) {
                     if($piece.hasClass('king')) {
                         $moves = $moves.add(validKingMoves($piece));
                     }
@@ -467,14 +469,11 @@
                     if($piece.hasClass('pawn')) {
                         $moves = $moves.add(validPawnMoves($piece));
                     }
-                }
+                //}
                 $moves.each(function() {
                     if($(this).children().length !== 0) {
                         // If a square is not empty, you can't moveTo there if
                         // you're not capturing a piece.
-                        $moves = $moves.not(this);
-                    }
-                    if(moveIsIntoCheck($piece, $piece.parent(), $(this))) {
                         $moves = $moves.not(this);
                     }
                 });
@@ -591,7 +590,7 @@
                     return $moves;
                 }
                 var $moves = $([]);
-                if($piece.hasClass(options.whoseTurn)) {
+                //if($piece.hasClass(options.whoseTurn)) {
                     if($piece.hasClass('king')) {
                         $moves = $moves.add(validKingCaptures($piece));
                     }
@@ -610,14 +609,14 @@
                     if($piece.hasClass('pawn')) {
                         $moves = $moves.add(validPawnCaptures($piece));
                     }
-                }
+                //}
                 $moves.each(function() {
                     if($(this).children().length == 0) {
                         // If a square is empty, you can't capture the piece
                         // in that square.
                         $moves = $moves.not(this);
                     }
-                    if($(this).children().hasClass(options.whoseTurn)) {
+                    if($(this).children().hasClass(color($piece))) {
                         // You can't capture your own pieces.
                         $moves = $moves.not(this);
                     }
@@ -625,33 +624,36 @@
                 return $moves;
             }
 
-            var otherColor = function(color) {
-                return color == 'white' ? 'black' : 'white';
+            var color = function($piece) {
+                return $piece.hasClass('white') ? 'white' : 'black';
             }
 
-            var moveIsIntoCheck = function($piece, $start, $end) {
-                /**
-                 * Whether or not the king will be in check if $piece moves
-                 * from $start to $end.
-                 */
-                // If the move was a capture, store what's there.
-                var $endContents = $end.html();
-                var $king = $('.'+options.whoseTurn+'.king');
-                $end.html($piece);
-                var moveIsIntoCheck = false;
-                $('.' + otherColor(options.whoseTurn)).each(function() {
-                    if(validCaptures($(this)).index($king) >= 0) {
-                        moveIsIntoCheck = true;
+            var otherColor = function(playerColor) {
+                return playerColor == 'white' ? 'black' : 'white';
+            }
+
+            var kingIsInCheck = function(playerColor) {
+                var kingIsInCheck = false;
+                king = $('.king.'+playerColor)[0];
+                $('.' + otherColor(playerColor)).each(function () {
+                    //console.log(validCaptures($(this)));
+                    $vc = validCaptures($(this));
+                    if($vc.length) {
+                        console.log($(this));
+                        for(var i = 0; i < $vc.length; i++) {
+                            console.log($vc.eq(i).attr('class'));
+                        }
+                    }
+                    if(validCaptures($(this)).filter('.king').length > 0) {
+                        kingIsInCheck = true;
                     }
                 });
-                $start.html($piece);
-                $end.html($endContents);
-                return moveIsIntoCheck;
+                return kingIsInCheck;
             }
 
-            var hasValidMoves = function(player) {
+            var hasValidMoves = function(color) {
                 $validMoves = $([]);
-                $('.' + player).each(function() {
+                $('.' + color).each(function() {
                     $validMoves = $validMoves.add(validMoves($(this)));
                     $validMoves = $validMoves.add(validCaptures($(this)));
                 });

@@ -59,3 +59,5 @@ Options
 
 *function($piece, move)*: A function that is executed after a piece moves. The return value of this function is not used.
 
+**onGameOver**
+*function(winner)*: A function called when the game is over. The winner is passed to the function.
